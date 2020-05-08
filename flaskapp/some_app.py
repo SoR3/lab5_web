@@ -7,9 +7,9 @@ Bootstrap(app)
 
 #декоратор для вывода страницы по умолчанию
 
-@app.route("/hello")
-def hello():
-  return " <html><head></head> <body> Hello World! </body></html>"
+@app.route("/")
+def home():
+  return render_template('homme.html')
 
 
 
