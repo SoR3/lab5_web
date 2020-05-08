@@ -79,8 +79,8 @@ def net():
     # проверяем нажатие сабмит и валидацию введенных данных
     if form.validate_on_submit():
         # файлы с изображениями читаются из каталога static
-        filename = os.path.join('./static/img', secure_filename(form.upload.data.filename))
-        fcount, fimage = neuronet.read_image_files(10,'./static/ing')
+        filename = os.path.join('./static', secure_filename(form.upload.data.filename))
+        fcount, fimage = neuronet.read_image_files(10,'./static')
         # передаем все изображения в каталоге на классификацию
         # можете изменить немного код и передать только загруженный файл
         decode = neuronet.getresult(fimage)
