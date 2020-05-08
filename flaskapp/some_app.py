@@ -1,5 +1,9 @@
 from flask import Flask
+from flask_bootstrap import Bootstrap
+
 app = Flask(__name__)
+Bootstrap(app)
+    
 
 #декоратор для вывода страницы по умолчанию
 
@@ -35,7 +39,10 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 app.config['RECAPTCHA_USE_SSL'] = False
 app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lc_p_IUAAAAACn_H3flmOnor4a5mGoAIliDQinR'
 app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lc_p_IUAAAAAKSlZ7qdbYa2a_w3I1KnkGMSQNj-'
+app.config['SECRET_KEY'] = '5atAStgWA6wqwtwa-Ww62_215sA_F-224sA_352hSAIFUHJasropjAS'
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
+
+#app.config['WTF_CSRF_SECRET_KEY'] = '6Lc_p_IUAAAAAKSlZ7qdbYa2a_w3I1KnkGMSQNj'
 
 # создаем форму для загрузки файла
 class NetForm(FlaskForm):
@@ -84,7 +91,7 @@ def net():
             form.upload.data.save(filename)
             # передаем форму в шаблон, так же передаем имя файла и результат работы нейронной
             # сети если был нажат сабмит, либо передадим falsy значения
-    return render_template('net.html',form=form,image_name=filename,neurodic=neurodic)
+    return render_template('net.html',form = form, image_name=filename,neurodic=neurodic)
     
     
 from flask import request
@@ -93,9 +100,11 @@ import base64
 from PIL import Image
 from io import BytesIO
 import json
+import net as neuronet
 # метод для обработки запроса от пользователя
 @app.route("/apinet",methods=['GET', 'POST'])
 def apinet():
+    neurodic = {}
     # проверяем что в запросе json данные
     if request.mimetype == 'application/json':
         # получаем json данные
@@ -110,7 +119,6 @@ def apinet():
         # чтобы считать изображение как файл из памяти используем BytesIO
         img = Image.open(BytesIO(cfile))
         decode = neuronet.getresult([img])
-        neurodic = {}
         for elem in decode:
             neurodic[elem[0][1]] = str(elem[0][2])
             print(elem)
@@ -118,7 +126,7 @@ def apinet():
         # handle = open('./static/f.png','wb')
         # handle.write(cfile)
         # handle.close()
-        # преобразуем словарь в json строку
+    # преобразуем словарь в json строку
     ret = json.dumps(neurodic)
     # готовим ответ пользователю
     resp = Response(response=ret,
@@ -129,4 +137,5 @@ def apinet():
     
     
 if __name__ == "__main__":
-    app.run(host='127.0.0.1',port=5000)
+    
+    app.run(host='127.0.0.1',port=5000,debug = True)

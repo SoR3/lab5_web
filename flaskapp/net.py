@@ -38,7 +38,7 @@ def read_image_files(files_max_count,dir_name):
     files_count = files_max_count
     if(files_max_count>len(files)): # определяем количество файлов не больше max
         files_count = len(files)
-        image_box = [[]]*files_count
+    image_box = [[]]*files_count
     for file_i in range(files_count): # читаем изображения в список
         image_box[file_i] = Image.open(dir_name+'/'+files[file_i]) # / ??
     return files_count, image_box
@@ -59,5 +59,5 @@ def getresult(image_box):
     return decode
 # заранее вызываем работу сети, так как работа с gpu требует времени
 # из-за инициализации библиотек
-fcount, fimage = read_image_files(1,'./static')
+fcount, fimage = read_image_files(2,'./static')
 decode = getresult(fimage)
