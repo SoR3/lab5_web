@@ -31,7 +31,7 @@ except:
     
     
 try:
-    r = requests.get('http://localhost:5000/hello')
+    r = requests.get('http://localhost:5000/')
     print(r.status_code)
     if(r.status_code!=200):
         exit(1)
