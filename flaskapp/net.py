@@ -59,5 +59,5 @@ def getresult(image_box):
     return decode
 # заранее вызываем работу сети, так как работа с gpu требует времени
 # из-за инициализации библиотек
-fcount, fimage = read_image_files(3,'./static')
+fcount, fimage = read_image_files(2,'./static')
 decode = getresult(fimage)
