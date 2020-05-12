@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
 
 # наша новая функция сайта
-# @app.route("/data_to")
+# @app.route("/data_to")s
 # def data_to():
 #     return render_template('simple.html')
 
