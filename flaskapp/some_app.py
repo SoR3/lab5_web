@@ -38,8 +38,8 @@ if __name__ == "__main__":
 
 
 app.config['RECAPTCHA_USE_SSL'] = False
-app.config['RECAPTCHA_PUBLIC_KEY'] = '6LdWjfUUAAAAAL7mLdm45iopHgunpXdOyP0gi1yt'
-app.config['RECAPTCHA_PRIVATE_KEY'] = '6LdWjfUUAAAAAGSRVo9OqQLCSX72vKPxVCvrXEw-'
+app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lc_p_IUAAAAACn_H3flmOnor4a5mGoAIliDQinR'
+app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lc_p_IUAAAAAKSlZ7qdbYa2a_w3I1KnkGMSQNj-'
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
 
 
