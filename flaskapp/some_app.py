@@ -32,9 +32,9 @@ if __name__ == "__main__":
 
 
 # наша новая функция сайта
-@app.route("/data_to")
-def data_to():
-    return render_template('simple.html')
+# @app.route("/data_to")
+# def data_to():
+#     return render_template('simple.html')
 
 
 app.config['RECAPTCHA_USE_SSL'] = False
