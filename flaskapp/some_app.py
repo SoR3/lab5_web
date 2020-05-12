@@ -1,70 +1,91 @@
-from flask import Flask, request, Response, render_template
+import os
+import net as neuronet
+import base64
+import json
+import threading
+import lxml.etree as ET
+from flask import Flask
+from flask import request, Response, render_template
 from flask_bootstrap import Bootstrap
-from werkzeug.utils import secure_filename
-from flask_wtf import FlaskForm,RecaptchaField
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-import lxml.etree as ET
-import os, base64, json
+from werkzeug.utils import secure_filename
 from PIL import Image
 from io import BytesIO
-import net as neuronet
-
 
 app = Flask(__name__)
-Bootstrap(app)
-    
+
+SECRET_KEY = 'secret'
+app.config['SECRET_KEY'] = SECRET_KEY
+bootstrap = Bootstrap(app)
+
 
 @app.route("/")
 def hello():
-  return " <html><head></head> <body> Hello World! </body></html>"
+    return render_template('home.html')
 
 
+if __name__ == "__main__":
+    app.run(host='127.0.0.1', port=5000)
 
+
+# наша новая функция сайта
 @app.route("/data_to")
 def data_to():
-  some_pars = {'user':'Ivan','color':'red'}
-  some_str = 'Hello my dear friends!'
-  some_value = 10
-  return render_template('simple.html',some_str = some_str,
-                            some_value = some_value,some_pars=some_pars)
-    
+    return render_template('simple.html')
+
 
 app.config['RECAPTCHA_USE_SSL'] = False
-app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lc_p_IUAAAAACn_H3flmOnor4a5mGoAIliDQinR'
-app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lc_p_IUAAAAAKSlZ7qdbYa2a_w3I1KnkGMSQNj-'
-app.config['SECRET_KEY'] = '5atAStgWA6wqwtwa-Ww62_215sA_F-224sA_352hSAIFUHJasropjAS'
+app.config['RECAPTCHA_PUBLIC_KEY'] = '6LdWjfUUAAAAAL7mLdm45iopHgunpXdOyP0gi1yt'
+app.config['RECAPTCHA_PRIVATE_KEY'] = '6LdWjfUUAAAAAGSRVo9OqQLCSX72vKPxVCvrXEw-'
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
 
 
+# app.config['UPLOAD_FOLDER'] = './data'
+# app.config['ALLOWED_EXTENSIONS'] = {'jpg','png','jpeg'}
+
+# создаем форму для загрузки файла
 class NetForm(FlaskForm):
-    openid = StringField('openid', validators = [DataRequired()])
+    # валидатор проверяет введение данных после submit
+    # и указывает пользователю ввести данные
+    openid = StringField('openid', validators=[DataRequired()])
+    # здесь валидатор укажет ввести правильные файлы
     upload = FileField('Load image', validators=[
-    FileRequired(),
-    FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
+        FileRequired(),
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
     recaptcha = RecaptchaField()
+    # кнопка submit
     submit = SubmitField('send')
 
 
-
-
-@app.route("/net",methods=['GET', 'POST'])
+@app.route("/net", methods=['GET', 'POST'])
 def net():
+    # создаем объект формы
     form = NetForm()
-    filename=None
+    # обнуляем переменные передаваемые в форму
+    filename = None
     neurodic = {}
+    # проверяем нажатие сабмит и валидацию введенных данных
     if form.validate_on_submit():
+        # файлы с изображениями читаются из каталога static
         filename = os.path.join('./static', secure_filename(form.upload.data.filename))
-        fcount, fimage = neuronet.read_image_files(10,'./static')
+        fcount, fimage = neuronet.read_image_files(10, './static')
+        # передаем все изображения в каталоге на классификацию
+        # можете изменить немного код и передать только загруженный файл
         decode = neuronet.getresult(fimage)
+        # записываем в словарь данные классификации
         for elem in decode:
             neurodic[elem[0][1]] = elem[0][2]
-            form.upload.data.save(filename)
-    return render_template('net.html',form = form, image_name=filename,neurodic=neurodic)
+        # сохраняем загруженный файл
+        form.upload.data.save(filename)
+    # передаем форму в шаблон, так же передаем имя файла и результат работы нейронной
+    # сети если был нажат сабмит, либо передадим falsy значения
+    return render_template('net.html', form=form, image_name=filename, neurodic=neurodic)
 
 
-@app.route("/apinet",methods=['GET', 'POST'])
+@app.route("/apinet", methods=['GET', 'POST'])
 def apinet():
     neurodic = {}
     if request.mimetype == 'application/json':
@@ -78,21 +99,21 @@ def apinet():
             print(elem)
     ret = json.dumps(neurodic)
     resp = Response(response=ret,
-                status=200,
-                mimetype="application/json")
-    return resp    
+                    status=200,
+                    mimetype="application/json")
+    return resp
 
 
-
-@app.route("/apixml",methods=['GET', 'POST'])
+@app.route("/apixml", methods=['GET', 'POST'])
 def apixml():
+    # парсим xml файл в dom
     dom = ET.parse("./static/xml/file.xml")
+    # парсим шаблон в dom
     xslt = ET.parse("./static/xml/file.xslt")
+    # получаем трансформер
     transform = ET.XSLT(xslt)
+    # преобразуем xml с помощью трансформера xslt
     newhtml = transform(dom)
+    # преобразуем из памяти dom в строку, возможно, понадобится указать кодировку
     strfile = ET.tostring(newhtml)
     return strfile
-    
-    
-if __name__ == "__main__":
-    app.run(host='127.0.0.1',port=5000,debug = True)
